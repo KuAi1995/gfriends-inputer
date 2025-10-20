@@ -16,6 +16,7 @@ from json import loads
 from lxml import etree
 from PIL import Image, ImageFilter
 from aip import AipBodyAnalysis
+import xml.etree.ElementTree as ET
 
 
 def fix_size(type, path):
@@ -671,6 +672,16 @@ def update_actor_nfo():
 
         logger.info(f'成功更新 Actor.nfo 文件，添加了 {len(actresses)} 个演员')
         print(f'√ 成功更新 Actor.nfo 文件，添加了 {len(actresses)} 个演员')
+
+        # 读取 XML 文件
+        tree = ET.parse('Actor.nfo')
+        root = tree.getroot()
+
+        # 直接格式化整个文件并写入
+        ET.indent(root, space="  ", level=0)  # Python 3.9+
+        tree.write('Actor.nfo',
+                   encoding='utf-8', xml_declaration=True)
+        print(f'√ 成功格式化 Actor.nfo 文件，添加了 {len(actresses)} 个演员')
         return True
 
     except Exception as e:
