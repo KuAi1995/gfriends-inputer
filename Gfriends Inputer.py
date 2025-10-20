@@ -463,7 +463,7 @@ def read_config(config_file):
 Host_Url = http://localhost:8096/
 	
 ### Emby / Jellyfin API 密钥 ###
-Host_API = 
+Host_API = 1bab88f2824c4747a89795e4418efb1a
 
 [下载设置]
 ### 下载文件夹 ###
