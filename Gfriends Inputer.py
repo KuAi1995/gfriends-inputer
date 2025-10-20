@@ -682,6 +682,28 @@ def update_actor_nfo():
         tree.write('Actor.nfo',
                    encoding='utf-8', xml_declaration=True)
         print(f'√ 成功格式化 Actor.nfo 文件，添加了 {len(actresses)} 个演员')
+
+        # 复制 Actor.nfo 到指定目录
+        target_paths = [
+            '/media/nasDisk1/Emby/Love/actor/actor/Actor.nfo',
+            '/home/fulin/emby/video_cloud/actor/Actor.nfo'
+        ]
+
+        for target_path in target_paths:
+            try:
+                # 确保目标目录存在
+                target_dir = os.path.dirname(target_path)
+                if not os.path.exists(target_dir):
+                    os.makedirs(target_dir)
+
+                # 复制文件
+                import shutil
+                shutil.copy2('Actor.nfo', target_path)
+                logger.info(f'成功复制 Actor.nfo 到 {target_path}')
+                print(f'√ 成功复制 Actor.nfo 到 {target_path}')
+            except Exception as e:
+                logger.error(f'复制 Actor.nfo 文件到 {target_path} 失败：{format_exc()}')
+                print(f'× 复制 Actor.nfo 文件到 {target_path} 失败：{str(e)}')
         return True
 
     except Exception as e:
