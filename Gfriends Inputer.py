@@ -607,12 +607,28 @@ def read_persons(host_url, api_key):
             for person in output:
                 f.write(str(person) + '\n')
         logger.info('已将完整输出保存到 output.txt 文件中')
+        print('已将完整输出保存到 output.txt 文件中')
 
         # 将演员名称写入 actress.txt 文件
         with open('actress.txt', 'w', encoding='utf-8') as f:
+            # 同时收集没有头像的演员
+            no_image_actresses = []
             for person in output:
                 f.write(person['Name'] + '\n')
-        logger.info('已将所有演员名称保存到 actress.txt 文件中')
+                # 检查是否有头像
+                if not person.get('ImageTags') or 'Primary' not in person['ImageTags']:
+                    no_image_actresses.append(person['Name'])
+
+            # 将没有头像的演员保存到 actress_no_image.txt
+            with open('actress_no_image.txt', 'w', encoding='utf-8') as no_image_file:
+                for actress in no_image_actresses:
+                    no_image_file.write(actress + '\n')
+
+            logger.info(f'已将所有演员名称保存到 actress.txt 文件中，其中 {len(no_image_actresses)} 人没有头像')
+            print(f'已将所有演员名称保存到 actress.txt 文件中，其中 {len(no_image_actresses)} 人没有头像')
+
+        logger.info('已将没有头像的演员保存到 actress_no_image.txt 文件中')
+        print('已将没有头像的演员保存到 actress_no_image.txt 文件中')
 
         # 更新 Actor.nfo 文件
         update_actor_nfo()
