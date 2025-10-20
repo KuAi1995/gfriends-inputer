@@ -566,7 +566,7 @@ Version = '''
 
 def read_persons(host_url, api_key):
     rewriteable_word('>> 连接 Emby / Jellyfin 服务器...')
-    host_url_persons = host_url + 'Persons?api_key=' + api_key  # &PersonTypes=Actor
+    host_url_persons = host_url + 'Persons?api_key=' + api_key + '&PersonTypes=Actor'
     try:
         rqs_emby = session.get(url=host_url_persons, proxies=host_proxies, timeout=60, verify=False)
     except requests.exceptions.ConnectionError:
