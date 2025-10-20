@@ -600,11 +600,83 @@ def read_persons(host_url, api_key):
         logger.info('连接 Emby / Jellyfin 服务器成功，包含演员：' + str(len(output)))
         print('√ 连接 Emby / Jellyfin 服务器成功')
         print('   演职人员：' + str(len(output)) + '人\n')
+
+        # 将完整的output保存到output.txt文件中
+        with open('output.txt', 'w', encoding='utf-8') as f:
+            for person in output:
+                f.write(str(person) + '\n')
+        logger.info('已将完整输出保存到 output.txt 文件中')
+
+        # 将演员名称写入 actress.txt 文件
+        with open('actress.txt', 'w', encoding='utf-8') as f:
+            for person in output:
+                f.write(person['Name'] + '\n')
+        logger.info('已将所有演员名称保存到 actress.txt 文件中')
+
+        # 更新 Actor.nfo 文件
+        update_actor_nfo()
+
         return output
     except:
         logger.error('Emby / Jellyfin 的响应无法解析为 Json：' + rqs_emby.headers['Content-Type'])
         print('× 连接 Emby / Jellyfin 服务器成功，但是服务器的演员列表不能识别：' + rqs_emby.headers['Content-Type'])
         sys.exit()
+
+
+def update_actor_nfo():
+    """更新 Actor.nfo 文件，将 actress.txt 中的演员添加到文件中，保持标准格式"""
+    try:
+        # 读取 actress.txt 中的演员列表
+        if not os.path.exists('actress.txt'):
+            logger.error('actress.txt 文件不存在')
+            print('× actress.txt 文件不存在')
+            return False
+
+        with open('actress.txt', 'r', encoding='utf-8') as f:
+            actresses = [line.strip() for line in f.readlines() if line.strip()]
+
+        # 读取 Actor.nfo 文件
+        if not os.path.exists('Actor.nfo'):
+            logger.error('Actor.nfo 文件不存在')
+            print('× Actor.nfo 文件不存在')
+            return False
+
+        # 解析 XML 文件
+        parser = etree.XMLParser(encoding='utf-8')
+        tree = etree.parse('Actor.nfo', parser)
+        root = tree.getroot()
+
+        # 删除现有的 actor 节点
+        for actor in root.xpath('//actor'):
+            root.remove(actor)
+
+        # 找到 title 节点的位置
+        title_element = root.find('title')
+        if title_element is not None:
+            # 在 title 节点后添加 actor 节点
+            for i, actress in enumerate(actresses):
+                actor_element = etree.Element('actor')
+                name_element = etree.SubElement(actor_element, 'name')
+                name_element.text = actress
+                type_element = etree.SubElement(actor_element, 'type')
+                type_element.text = 'Actor'
+
+                # 插入到 title 节点之后
+                title_element.addnext(actor_element)
+                # 更新 title_element 为刚插入的 actor_element，以便下一个 actor 插入到正确位置
+                title_element = actor_element
+
+        # 保存修改后的文件，使用标准格式
+        tree.write('Actor.nfo', encoding='utf-8', xml_declaration=True, standalone='yes', pretty_print=True)
+
+        logger.info(f'成功更新 Actor.nfo 文件，添加了 {len(actresses)} 个演员')
+        print(f'√ 成功更新 Actor.nfo 文件，添加了 {len(actresses)} 个演员')
+        return True
+
+    except Exception as e:
+        logger.error('更新 Actor.nfo 文件失败：' + format_exc())
+        print('× 更新 Actor.nfo 文件失败：' + str(e))
+        return False
 
 
 def write_txt(filename, content):
@@ -972,7 +1044,7 @@ try:
                     else:
                         proc_log.write(proc_md5 + '\n')
                     while True:
-                        if threading.activeCount() > max_download_connect + 1:
+                        if threading.active_count() > max_download_connect + 1:
                             time.sleep(0.01)
                         else:
                             break
