@@ -701,7 +701,7 @@ def update_actor_nfo():
 
         # 复制 Actor.nfo 到指定目录
         target_paths = [
-            '/media/nasDisk1/Emby/Love/actor/actor/Actor.nfo',
+            '/media/nasDisk1/Emby/AV Japan Love/actor/actor/Actor.nfo',
             '/home/fulin/Emby/AV Japan/actor/Actor.nfo'
         ]
 
