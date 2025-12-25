@@ -500,7 +500,7 @@ Conflict_Proc = 0
 # 推荐开启全局代理而不是使用此局部代理
 # HTTP 代理格式为 http://IP:端口 , 如 http://localhost:7890
 # Socks 代理格式为 socks+协议版本://IP:端口 , 如 socks5h://localhost:7890
-Proxy = 
+Proxy = http://localhost:7890
 
 [导入设置]
 ### 搜索女友个人信息 ###
@@ -794,7 +794,17 @@ def check_update():
         # `v2.94` > `2.94`
         # `v3.0.0` > `3.0.0` > `0.0.3` > `00.3` > `3.00`
         local_ver = version.replace('v', '')
-        remote_ver = loads(response.text)[0]['tag_name'].replace('v', '')
+        try:
+            response_data = loads(response.text)
+            if isinstance(response_data, list) and len(response_data) > 0:
+                remote_ver = response_data[0]['tag_name'].replace('v', '')
+            else:
+                # 处理空列表或非列表情况
+                print("警告：无法获取远程版本信息")
+                return
+        except (KeyError, IndexError, TypeError) as e:
+            print(f"解析版本信息时出错：{e}")
+            return
         if remote_ver.count('.') > 1:
             remote_ver = remote_ver[::-1].replace('.', '', 1)[::-1]
         if local_ver.count('.') > 1:
